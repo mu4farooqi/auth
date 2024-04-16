@@ -356,6 +356,7 @@ type SmsProviderConfiguration struct {
 	Messagebird  MessagebirdProviderConfiguration  `json:"messagebird"`
 	Textlocal    TextlocalProviderConfiguration    `json:"textlocal"`
 	Vonage       VonageProviderConfiguration       `json:"vonage"`
+	Postack      PostackProviderConfiguration      `json:"postack"`
 }
 
 func (c *SmsProviderConfiguration) GetTestOTP(phone string, now time.Time) (string, bool) {
@@ -383,6 +384,11 @@ type TwilioVerifyProviderConfiguration struct {
 type MessagebirdProviderConfiguration struct {
 	AccessKey  string `json:"access_key" split_words:"true"`
 	Originator string `json:"originator" split_words:"true"`
+}
+
+type PostackProviderConfiguration struct {
+	ApiKey 	string `json:"api_key" split_words:"true"`
+	ProfileId 	string `json:"profile_id" split_words:"true"`
 }
 
 type TextlocalProviderConfiguration struct {
@@ -812,6 +818,16 @@ func (t *MessagebirdProviderConfiguration) Validate() error {
 	}
 	if t.Originator == "" {
 		return errors.New("missing Messagebird originator")
+	}
+	return nil
+}
+
+func (t *PostackProviderConfiguration) Validate() error {
+	if t.ApiKey == "" {
+		return errors.New("missing Postack API key")
+	}
+	if t.ProfileId == "" {
+		return errors.New("missing Postack verification profile id")
 	}
 	return nil
 }

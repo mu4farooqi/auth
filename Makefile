@@ -46,9 +46,9 @@ sec: dev-deps # Check for security vulnerabilities
 unused: dev-deps # Look for unused code
 	@echo "Unused code:"
 	staticcheck -checks U1000 $(CHECK_FILES)
-	
+
 	@echo
-	
+
 	@echo "Code used only in _test.go (do move it in those files):"
 	staticcheck -checks U1000 -tests=false $(CHECK_FILES)
 

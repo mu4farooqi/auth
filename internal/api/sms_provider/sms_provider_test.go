@@ -47,6 +47,10 @@ func TestSmsProvider(t *testing.T) {
 					AccessKey:  "test_access_key",
 					Originator: "test_originator",
 				},
+				Postack: conf.PostackProviderConfiguration{
+					ApiKey:    "test_api_key",
+					ProfileId: "test_profile_id",
+				},
 				Vonage: conf.VonageProviderConfiguration{
 					ApiKey:    "test_api_key",
 					ApiSecret: "test_api_secret",
@@ -167,6 +171,32 @@ func (ts *SmsProviderTestSuite) TestMessagebirdSendSms() {
 	})
 
 	_, err = messagebirdProvider.SendSms(phone, message)
+	require.NoError(ts.T(), err)
+}
+
+func (ts *SmsProviderTestSuite) TestPostackSendSms() {
+	defer gock.Off()
+	provider, err := NewPostackProvider(ts.Config.Sms.Postack)
+	require.NoError(ts.T(), err)
+
+	postackProvider, ok := provider.(*PostackProvider)
+	require.Equal(ts.T(), true, ok)
+
+	phone := "123456789"
+	code := "123456"
+
+	body := url.Values{
+		"verification[to]": {"+" + phone},
+		"verification[verification_profile_id]": {postackProvider.Config.ProfileId},
+		"verification[code]": {code},
+	}
+
+	gock.New(postackProvider.APIPath).Post("").MatchHeader("Authorization", "Bearer "+postackProvider.Config.ApiKey).MatchType("url").BodyString(body.Encode()).Reply(200).JSON(PostackResponse{
+		ID:     "abcdef",
+		Status: "QUEUED",
+	})
+
+	_, err = postackProvider.SendSms(phone, code)
 	require.NoError(ts.T(), err)
 }
 
